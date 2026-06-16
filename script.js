@@ -1,9 +1,18 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// ضبط أبعاد لوحة الرسم داخلياً (ثابتة للحسابات البرمجية والـ CSS يتكفل بالظاهر)
-canvas.width = 800;
-canvas.height = 600;
+// دالة لتحديث أبعاد لوحة الرسم داخلياً لتطابق الشاشة تماماً مع الحفاظ على النسب الجديدة
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    // إعادة تمركز أبعاد الولد أسفل الشاشة الجديدة ديناميكياً
+    boy.y = canvas.height - boy.height; 
+    
+    // إعادة تموضع الشجرة الكبيرة في المنتصف الخلفي السفلي
+    tree.x = canvas.width / 2 - tree.width / 2;
+    tree.y = canvas.height - tree.height - 20;
+}
 
 // عناصر الواجهة
 const startScreen = document.getElementById('start-screen');
@@ -24,7 +33,6 @@ let fallingObjects = [];
 let spawnTimer = 0;
 let currentTreeState = "happy"; 
 
-// كائن تتبع حالة ضغط الأسهم للـ PC
 const keys = {
     ArrowLeft: false,
     ArrowRight: false
@@ -43,7 +51,6 @@ sadTreeImg.src = 'img/tree_sad.png';
 const mineImg = new Image();
 mineImg.src = 'img/mine.png'; 
 
-// تحميل مصفوفة صور القيم التربوية الستة
 const goodImagesNames = [
     'kindness.png',
     'respect.png',
@@ -59,77 +66,57 @@ const goodImagesPool = goodImagesNames.map(name => {
     return img;
 });
 
-// --- استدعاء الأصوات المحلية ---
+// --- استدعاء الأصوات ---
 const soundSuccess = new Audio('sounds/success.mp3'); 
 const soundHit = new Audio('sounds/hit.mp3');         
 const soundWin = new Audio('sounds/win.mp3');         
 const soundLose = new Audio('sounds/lose.mp3');       
 
-// إعدادات الولد (اللاعب)
+// إعدادات الولد (اللاعب) - تم تكبيره وتثبيته على الأرض بشكل متناسق
 const boy = {
-    x: 300,
-    y: 390, 
-    width: 300,  
-    height: 200, 
-    speed: 15
+    x: window.innerWidth / 2 - 150,
+    y: window.innerHeight - 260, // تم إنزاله ليلتصق بأسفل الشاشة تماماً
+    width: 380,                  // تكبير العرض ليناسب الشاشة الكاملة
+    height: 260,                 // تكبير الارتفاع لتبدو تفاصيله واضحة
+    speed: 18                    // زيادة طفيفة في السرعة لتناسب حجمه الجديد
 };
 
-// إعدادات الشجرة في الخلفية
+// إعدادات الشجرة التكيفية في الخلفية - تم تكبيرها لتصبح شجرة حقيقية فخمة
 const tree = {
-    x: 270, 
-    y: 100,
-    width: 260,
-    height: 350
+    x: window.innerWidth / 2 - 200, 
+    y: window.innerHeight - 520,
+    width: 400,                  // تكبير عرض الشجرة
+    height: 500                  // تكبير ارتفاع الشجرة لتظهر في منتصف السماء بروعة
 };
 
-// --- 🎮 دالة مركزية لحساب موقع الـ X وحماية الحواف (للجوال والكمبيوتر) 🎮 ---
+// تشغيل وظيفة ضبط المقاسات فوراً ولتتحدث عند تدوير الجوال أو تغيير حجم نافذة اللاب توب
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
 function handlePlayerMovement(clientX) {
     const rect = canvas.getBoundingClientRect();
-    // حساب النسبة بين الحجم الداخلي للـ Canvas والحجم الظاهري المعروض على الشاشة
-    const scaleX = canvas.width / rect.width;
-    const mouseX = (clientX - rect.left) * scaleX;
+    const mouseX = clientX - rect.left;
     
     boy.x = mouseX - boy.width / 2;
     
-    // حدود الحواف المرنة الأصلية
-    if (boy.x < -boy.width / 3) {
-        boy.x = -boy.width / 3;
-    }
-    if (boy.x > canvas.width - (boy.width * 2 / 3)) {
-        boy.x = canvas.width - (boy.width * 2 / 3);
-    }
+    // منع الخروج عن حواف شاشة العرض الكاملة تماماً
+    if (boy.x < -boy.width / 4) boy.x = -boy.width / 4;
+    if (boy.x > canvas.width - (boy.width * 3 / 4)) boy.x = canvas.width - (boy.width * 3 / 4);
 }
 
-// 🖱️ تتبع حركة الماوس للـ PC
-canvas.addEventListener('mousemove', (e) => {
-    handlePlayerMovement(e.clientX);
-});
-
-// 📱 --- [إضافة جديدة] تتبع اللمس والسحب للشاشات الذكية والجوال --- 📱
-canvas.addEventListener('touchstart', (e) => {
-    if (e.touches.length > 0) {
-        handlePlayerMovement(e.touches[0].clientX);
-    }
-}, { passive: true });
-
+// أحداث الماوس واللمس
+canvas.addEventListener('mousemove', (e) => { handlePlayerMovement(e.clientX); });
+canvas.addEventListener('touchstart', (e) => { if (e.touches.length > 0) handlePlayerMovement(e.touches[0].clientX); }, { passive: true });
 canvas.addEventListener('touchmove', (e) => {
     if (e.touches.length > 0) {
         handlePlayerMovement(e.touches[0].clientX);
-        // منع الشاشة من الاهتزاز أو السحب لأسفل أثناء اللعب على المتصفح في الجوال
         e.preventDefault(); 
     }
 }, { passive: false });
 
+window.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') keys[e.key] = true; });
+window.addEventListener('keyup', (e) => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') keys[e.key] = false; });
 
-// مستمعي أحداث لوحة المفاتيح (الأسهم للـ PC)
-window.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') keys[e.key] = true;
-});
-window.addEventListener('keyup', (e) => {
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') keys[e.key] = false;
-});
-
-// تشغيل اللعبة
 startBtn.addEventListener('click', startGame);
 restartBtn.addEventListener('click', startGame);
 
@@ -151,6 +138,7 @@ function startGame() {
     gameOverScreen.classList.add('hidden');
     gameScreen.classList.remove('hidden');
 
+    resizeCanvas(); // تأكيد المقاسات ثانيةً عند بدء اللعب
     requestAnimationFrame(gameLoop);
 }
 
@@ -158,16 +146,17 @@ function updateLivesDisplay() {
     livesDisplay.innerText = "🍃".repeat(lives) + "🍂".repeat(5 - lives);
 }
 
-// الكلاس الخاص بالأشياء الساقطة
 class FallingObject {
     constructor() {
         this.type = Math.random() > 0.2 ? 'drop' : 'rock';
-        this.x = Math.random() * (canvas.width - 160) + 80;
-        this.y = -50;
-        this.speed = Math.random() * 0.5 + 0.5 + (score * 0.05);
-        this.radius = 35; 
+        this.x = Math.random() * (canvas.width - 120) + 60;
+        this.y = -60;
+        // تعديل السرعة لتتناسب مع طول الشاشة الديناميكي
+        this.speed = Math.random() * 1.5 + 1.5 + (score * 0.08);
+        this.radius = 30; 
         
-        this.height = 75; // حجم مريح ومقروء HD بناءً على اختيارك السابق لارتفاع الصور
+        // حجم الصور HD ممتاز للرؤية والشاشات الكاملة
+        this.height = 110; 
         
         if (this.type === 'drop') {
             const randomIndex = Math.floor(Math.random() * goodImagesPool.length);
@@ -177,22 +166,21 @@ class FallingObject {
                 const aspectRatio = this.img.naturalWidth / this.img.naturalHeight;
                 this.width = this.height * aspectRatio;
             } else {
-                this.width = 140; 
+                this.width = 110; 
             }
         } else {
             if (mineImg.complete && mineImg.naturalWidth > 0) {
                 const aspectRatio = mineImg.naturalWidth / mineImg.naturalHeight;
                 this.width = this.height * aspectRatio; 
             } else {
-                this.width = 140; 
+                this.width = 110; 
             }
         }
     }
 
     update() {
         this.y += this.speed;
-        
-        if (this.type === 'drop' && this.width === 140 && this.img.complete && this.img.naturalWidth > 0) {
+        if (this.type === 'drop' && this.width === 110 && this.img.complete && this.img.naturalWidth > 0) {
             const aspectRatio = this.img.naturalWidth / this.img.naturalHeight;
             this.width = this.height * aspectRatio;
         }
@@ -211,15 +199,16 @@ class FallingObject {
 
 function drawTreeImage() {
     let scaleModifier = 1 + (score * 0.02); 
-    if (scaleModifier > 1.4) scaleModifier = 1.4; 
+    if (scaleModifier > 1.3) scaleModifier = 1.3; 
 
-    if (currentTreeState === "win") scaleModifier = 1.4;
+    if (currentTreeState === "win") scaleModifier = 1.3;
 
     let currentWidth = tree.width * scaleModifier;
     let currentHeight = tree.height * scaleModifier;
 
-    let centerX = (tree.x + tree.width / 2) - (currentWidth / 2);
-    let currentY = canvas.height - currentHeight - 50; 
+    // تمركز الشجرة دائماً في منتصف الشاشة السفلي خلف اللاعب
+    let centerX = (canvas.width / 2) - (currentWidth / 2);
+    let currentY = canvas.height - currentHeight - 30; 
 
     ctx.save();
     
@@ -235,29 +224,18 @@ function drawTreeImage() {
             { dx: currentWidth * 0.65, dy: currentHeight * 0.25 },
             { dx: currentWidth * 0.25, dy: currentHeight * 0.4 },
             { dx: currentWidth * 0.53, dy: currentHeight * 0.33 },
-            { dx: currentWidth * 0.75, dy: currentHeight * 0.40 },
-            { dx: currentWidth * 0.42, dy: currentHeight * 0.41 }
+            { dx: currentWidth * 0.75, dy: currentHeight * 0.40 }
         ];
-
         fruits.forEach(fruit => {
             let fruitX = centerX + fruit.dx;
             let fruitY = currentY + fruit.dy;
-            let radius = 12;
-
             ctx.beginPath();
-            ctx.arc(fruitX, fruitY, radius, 0, Math.PI * 2);
+            ctx.arc(fruitX, fruitY, 10, 0, Math.PI * 2);
             ctx.fillStyle = '#ff1744'; 
-            ctx.fill();
-            ctx.closePath();
-
-            ctx.beginPath();
-            ctx.arc(fruitX - 4, fruitY - 4, 3, 0, Math.PI * 2);
-            ctx.fillStyle = '#ffffff';
             ctx.fill();
             ctx.closePath();
         });
     }
-
     ctx.restore();
 }
 
@@ -273,7 +251,7 @@ function gameLoop() {
     drawTreeImage();
 
     spawnTimer++;
-    if (spawnTimer > 70) {
+    if (spawnTimer > 60) { // زيادة طفيفة في سرعة النزول لتناسب الشاشات الكبيرة
         fallingObjects.push(new FallingObject());
         spawnTimer = 0;
     }
@@ -283,11 +261,12 @@ function gameLoop() {
         obj.update();
         obj.draw();
 
-        const bucketTopY = boy.y + 15; 
-        const bucketLeftX = boy.x + 80;   
-        const bucketRightX = boy.x + boy.width - 80; 
+        // حساب منطقة الاصطدام بالدلو بدقة مرنة
+        const bucketTopY = boy.y + 10; 
+        const bucketLeftX = boy.x + 50;   
+        const bucketRightX = boy.x + boy.width - 50; 
 
-        if (obj.y + obj.radius >= bucketTopY && obj.y - obj.radius <= bucketTopY + 30 &&
+        if (obj.y + obj.radius >= bucketTopY && obj.y - obj.radius <= bucketTopY + 25 &&
             obj.x >= bucketLeftX && obj.x <= bucketRightX) {
             
             if (obj.type === 'drop') {
@@ -295,13 +274,13 @@ function gameLoop() {
                 scoreDisplay.innerText = score;
                 currentTreeState = "happy";
                 soundSuccess.currentTime = 0;
-                soundSuccess.play().catch(e => console.log(e));
+                soundSuccess.play().catch(e => {});
             } else {
                 lives -= 1;
                 updateLivesDisplay();
                 currentTreeState = "sad";   
                 soundHit.currentTime = 0;
-                soundHit.play().catch(e => console.log(e));
+                soundHit.play().catch(e => {});
 
                 if (lives <= 0) endGame(false);
             }
@@ -309,18 +288,16 @@ function gameLoop() {
             continue;
         }
 
-        if (obj.y > canvas.height + 40) {
+        if (obj.y > canvas.height + 50) {
             fallingObjects.splice(i, 1);
         }
     }
 
-    // حركة الأسهم (للـ PC)
     if (keys.ArrowRight) boy.x += boy.speed; 
     if (keys.ArrowLeft) boy.x -= boy.speed; 
 
-    // تطبيق الحماية العامة للحواف
-    if (boy.x < -boy.width / 3) boy.x = -boy.width / 3;
-    if (boy.x > canvas.width - (boy.width * 2 / 3)) boy.x = canvas.width - (boy.width * 2 / 3);
+    if (boy.x < -boy.width / 4) boy.x = -boy.width / 4;
+    if (boy.x > canvas.width - (boy.width * 3 / 4)) boy.x = canvas.width - (boy.width * 3 / 4);
 
     drawBoy();
 
@@ -341,16 +318,16 @@ function endGame(isWin) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawTreeImage(); 
         gameOverScreen.classList.remove('hidden');
-        soundWin.play().catch(e => console.log(e));
+        soundWin.play().catch(e => {});
         gameOverTitle.innerText = "🎉 مبروك يا بطل! 🎉";
-        gameOverMessage.innerText = `لقد جمعت ${score} قطرة من الكلمات الطيبة بوعائك وسقيت بها شجرة القلوب حتى أزهرت تماماً! ❤️`;
+        gameOverMessage.innerText = `لقد جمعت ${score} قيم تربوية بوعائك وسقيت بها شجرة القلوب حتى أزهرت تماماً! ❤️`;
     } else {
         currentTreeState = "sad"; 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawTreeImage(); 
         gameOverScreen.classList.remove('hidden');
-        soundLose.play().catch(e => console.log(e));
+        soundLose.play().catch(e => {});
         gameOverTitle.innerText = "🍂 حاول مرة أخرى 🍂";
-        gameOverMessage.innerText = `أصابت الشجرة بعض صخور الكلمات القاسية فذبلت. أعد اللعب لتملأ الدلو بقطرات اللطف مجدداً!`;
+        gameOverMessage.innerText = `أصابت الشجرة بعض ألغام السلوكيات الخاطئة فذبلت. أعد اللعب لتملأ الدلو بالقيم مجدداً!`;
     }
 }

@@ -1,34 +1,28 @@
-/* إعدادات عامة مريحة للعين */
+/* إعدادات عامة مريحة للعين وتصفير الفراغات */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     user-select: none;
-    -webkit-user-select: none; /* حماية إضافية للمس في الجوال */
+    -webkit-user-select: none;
 }
 
 body {
-    background: linear-gradient(to bottom, #09e914b7, #c2e9fb);
+    background: #c2e9fb;
     height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    width: 100vw;
     overflow: hidden;
-    padding: 10px; /* مسافة أمان صغيرة عند أطراف شاشات الجوال */
+    display: block; /* إلغاء التوسيط القديم */
 }
 
-/* الحاوية الرئيسية للعبة (محدثة لتكون مرنة تماماً للـ PC والجوال) */
+/* حاوية اللعبة تأخذ الشاشة كاملة الآن */
 #game-container {
     position: relative;
-    width: 100%;
-    max-width: 800px; /* أقصى عرض للعبة على شاشات الكمبيوتر الكبير */
-    aspect-ratio: 800 / 600; /* السحر هنا: يحافظ على أبعاد اللعبة ثابتة دون تمطيط أو كبس */
-    background: #eef2f3;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    width: 100vw;
+    height: 100vh;
     overflow: hidden;
-    border: 4px solid #fff;
+    background: #eef2f3;
 }
 
 canvas {
@@ -45,7 +39,7 @@ canvas {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 20px; /* زيادة مسافة الأمان الداخلية للنصوص */
+    padding: 20px;
     box-sizing: border-box;
     text-align: center;
 }
@@ -59,7 +53,6 @@ canvas {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    padding: 0;
 }
 
 #start-screen {
@@ -67,11 +60,6 @@ canvas {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
 }
 
 #game-over-screen {
@@ -85,74 +73,73 @@ canvas {
     flex-direction: column;
     justify-content: space-between; 
     align-items: center;
-    background: none !important;      
-    box-shadow: none !important;      
-    border: none !important;          
-    backdrop-filter: none !important; 
-    padding: 15px;
+    background: rgba(255, 255, 255, 0.4) !important; /* خلفية شفافة ناعمة ليظهر ما خلفها */     
+    padding: 30px;
 }
 
-/* تحديث مقاسات الخطوط لتتجاوب وتصغر برفق على شاشات الجوال */
 #game-over-title {
-    font-size: clamp(22px, 4vw, 32px); /* تصغير مرن وتلقائي حسب عرض الشاشة */
+    font-size: clamp(24px, 5vw, 36px);
     font-weight: bold;
     color: #1b5e20;
-    margin-top: 15px; 
-    margin-bottom: 0;
+    margin-top: 40px;
 }
 
 #game-over-message {
-    font-size: clamp(14px, 3vw, 18px); /* تصغير مرن وتلقائي للنص */
+    font-size: clamp(16px, 3.5vw, 22px);
     font-weight: bold;
     color: #2e7d32;
-    line-height: 1.4;
-    margin-top: 5px; 
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 580px; 
-    margin-bottom: auto; 
+    line-height: 1.5;
+    max-width: 650px;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 15px 25px;
+    border-radius: 15px;
+    margin: auto;
 }
 
 #restart-btn {
-    margin-bottom: clamp(15px, 5vw, 40px); /* تقليل النزول في شاشات الجوال لتجنب الخروج */
+    margin-bottom: 50px;
     cursor: pointer;
 }
 
 h1 {
     color: #2c3e50;
-    margin-bottom: 15px;
-    font-size: clamp(1.8rem, 5vw, 2.5rem);
+    margin-bottom: 20px;
+    font-size: clamp(2rem, 6vw, 3rem);
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px 20px;
+    border-radius: 15px;
 }
 
 p {
-    color: #555;
-    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
-    margin-bottom: 12px;
+    color: #333;
+    font-size: clamp(1rem, 3vw, 1.4rem);
+    margin-bottom: 15px;
     max-width: 90%;
+    font-weight: 500;
 }
 
 .instructions {
-    background: #e8f5e9;
-    padding: 12px;
+    background: rgba(232, 245, 233, 0.95);
+    padding: 15px;
     border-radius: 10px;
     border-right: 5px solid #4caf50;
-    font-size: clamp(0.8rem, 2vw, 1rem);
-    max-width: 90%;
+    font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+    max-width: 500px;
 }
 
 button {
     background: #ff6b6b;
     color: white;
     border: none;
-    padding: 12px 35px; /* أبعاد أزرار مريحة للمس بالإصبع */
-    font-size: clamp(1rem, 3vw, 1.3rem);
+    padding: 15px 45px;
+    font-size: clamp(1.1rem, 3.5vw, 1.5rem);
     font-weight: bold;
     border-radius: 50px;
     cursor: pointer;
     transition: transform 0.2s, background 0.2s;
     box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
-    margin-top: 15px;
-    touch-action: manipulation; /* تسريع استجابة الضغط على شاشات الجوال */
+    margin-top: 25px;
+    touch-action: manipulation;
 }
 
 button:hover {
@@ -160,15 +147,15 @@ button:hover {
     transform: scale(1.05);
 }
 
-/* شاشة اللعبة والعدادات العلوية (متناسقة تماماً مع أبعاد الشاشة المتغيرة) */
+/* العدادات العلوية */
 #hud {
     position: absolute;
-    top: 10px;
+    top: 20px;
     left: 5%;
     width: 90%;
     display: flex;
     justify-content: space-between;
-    font-size: clamp(0.9rem, 3vw, 1.3rem); /* تناسق حجم العدادات */
+    font-size: clamp(1rem, 3.5vw, 1.5rem);
     font-weight: bold;
     color: #333;
     z-index: 5;
@@ -176,9 +163,10 @@ button:hover {
 }
 
 #score-board, #lives-board {
-    background: rgba(255, 255, 255, 0.85);
-    padding: 6px 15px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 8px 20px;
     border-radius: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
 #score-board {
@@ -187,12 +175,5 @@ button:hover {
 
 #lives-board {
     border: 2px solid #81c784;
-    white-space: nowrap; /* يمنع الرموز 🍃 من النزول لسطر جديد في الجوال */
-}
-
-#win-tree-img {
-    width: clamp(120px, 25vw, 200px);      
-    height: auto;
-    margin-bottom: 10px;
-    display: block;    
+    white-space: nowrap;
 }
