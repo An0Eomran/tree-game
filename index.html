@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة ساقي شجرة القلوب</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- شاشة البداية -->
+        <div id="start-screen" class="screen">
+            <h1>🍃 لعبة ساقي شجرة القلوب ❤️</h1>
+            <p id="welcome-txt">أهلاً بك يا بطل! ساعد شجرة المشاعر لتكبر وتزهر بالكلمات <br> الطيبة.</p>
+            <p class="instructions">💡 <strong>طريقة اللعب:</strong> حرك الوعاء باستخدام <b>الماوس</b> أو <b>اللمس</b> لتجمع قطرات الكلمات الطيبة وتتجنب صخور الكلمات المؤذية!</p>
+            <button id="start-btn">ابدأ اللعب الآن 🌳</button>
+        </div>
+
+        <!-- شاشة اللعبة الحقيقية -->
+        <div id="game-screen" class="screen hidden">
+            <div id="hud">
+                <div id="score-board">❤️ عداد اللطف: <span id="score">0</span></div>
+                <div id="lives-board">🍂 الأوراق المتبقية: <span id="lives">💚💚💚💚💚</span></div>
+            </div>
+            
+            <!-- لوحة الرسم الخاصة باللعبة -->
+            <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <!-- شاشة نهاية اللعبة -->
+        <div id="game-over-screen" class="screen hidden">
+            <img id="win-tree-img" src="img/tree_happy.png" alt="الشجرة المثمرة" class="hidden">
+
+            <h1 id="game-over-title">النهاية</h1>
+            <p id="game-over-message"></p>
+            <button id="restart-btn">العب مرة أخرى 🔄</button>
+        </div>
+
+    </div>
+
+    <script href="script.js" src="script.js"></script>
+</body>
+</html>
